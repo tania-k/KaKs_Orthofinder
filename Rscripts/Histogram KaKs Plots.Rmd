@@ -15,6 +15,7 @@ library("dplyr")
 library("tidyverse")
 library("tidyr")
 library("reshape2")
+library("dplyr")
 library("tools")
 ```
 
@@ -59,22 +60,23 @@ pdf("Ks_ggplot.all_plot.pdf")
 
 s=read.csv("Fsimplex.tsv", header = TRUE)
 s=subset(s,KaKs<1.0)
-ggplot(data=s,aes(KaKs)) + geom_histogram(binwidth=0.01,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Friedmanniomyces simplex", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
+ggplot(data=s,aes(KaKs)) + geom_histogram(binwidth=0.01,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Friedmanniomyces simplex", x="Ks Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
 #qplot(s$KaKs, geom="histogram")
 
 e=read.csv("Fendolithicus.tsv", header=TRUE)
 e=subset(e,KaKs<1.0)
-Fendo=ggplot(data=e,aes(KaKs)) + geom_histogram(binwidth=0.02,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Friedmanniomyces endolithicus", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
+ggplot(data=e,aes(KaKs)) + geom_histogram(binwidth=0.02,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Friedmanniomyces endolithicus", x="Ks Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
 
 w=read.csv("Hwer.tsv", header=TRUE)
 w=subset(w,KaKs<1.0)
-Hwer=ggplot(data=w,aes(KaKs)) + geom_histogram(binwidth=0.02,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Hortaea werneckii", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
+ggplot(data=w,aes(KaKs)) + geom_histogram(binwidth=0.02,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Hortaea werneckii", x="Ks Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
 
 dev.off()
 ```
 
 
 ```{R}
+#Trying to create facets of each histogram
 pdf("Ks_Facet_ggplot.all_plot.pdf")
 
 #Take combined dataset and create visuals.
@@ -88,16 +90,35 @@ gg_long$frequency <-as.numeric(as.character(gg_long$frequency)) #making sure dat
 gg_long <- subset(gg_long, !is.na(frequency)) #lots of empty cells, remove with this.
 
 #this one gets them facing the right way
-plot = ggplot(data=gg_long, aes(strains, frequency), fill=count) + geom_bar(width=0.5, alpha = .8, stat = 'identity')
+plot1 = ggplot(data=gg_long, aes(strains, frequency), fill=count) + geom_bar(width=0.5, alpha = .8, stat = 'identity')
 
 #this one is horizontal
-plot = ggplot(data=gg_long, aes(frequency, strains), fill=count) + geom_bar(width=0.5, alpha = .8, stat = 'identity') 
+plot2 = ggplot(data=gg_long, aes(frequency, strains), fill=count) + geom_bar(width=0.5, alpha = .8, stat = 'identity') 
 
-plot(plot)
+plot(plot1)
+plot(plot2)
 #after_stat
 
 #KaKs_grid=plot + facet_grid(vars(strains), scales = "free")
-KaKs_grid=plot + facet_grid((strains ~ .), scales = "free")
+KaKs_grid=plot1 + facet_grid((strains ~ .), scales = "free")
 plot(KaKs_grid)
+dev.off()
+```
+
+
+```{R}
+#focus on box and whisker plots instead!
+pdf("Ks_BoxWhisker_ggplot.pdf")
+all=read.csv("all.tsv", sep="\t", header = TRUE, dec = ".", na.strings = c("-nan"), stringsAsFactors=FALSE) #added stringsAsFactors because of factors error.
+gg <- melt(all) #molten data
+gg=subset(all,F.endolithicus<1.0 & F.simplex<1.0 & H.werneckii<1.0) #get the smaller values
+gg_long <- gg %>% gather(species, frequency, F.endolithicus:H.werneckii) #gotta make this data long to have only TWO variables. https://stackoverflow.com/questions/61068031/error-stat-count-can-only-have-an-x-or-y-aesthetic 
+
+gg_long$species <-as.factor(as.character(gg_long$species))
+gg_long$frequency <-as.numeric(as.character(gg_long$frequency)) #making sure data is numbers
+gg_long <- subset(gg_long, !is.na(frequency)) #lots of empty cells, remove with this.
+
+p <- ggplot(gg_long, aes(species, frequency)) + geom_boxplot(outlier.shape = NA) + geom_jitter(width = 0.2) + labs(title="Ks of Ancestral Duplicated Genes for Friedmanniomyces endolithicus, \n Friedmanniomyces simplex and Hortaea werneckii", x="Species", y="Ks")
+p
 dev.off()
 ```
