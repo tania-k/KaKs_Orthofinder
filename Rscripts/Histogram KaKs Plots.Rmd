@@ -1,0 +1,104 @@
+---
+title: "Histogram KaKs Plots"
+author: "Tania Kurbessoian"
+date: "12/29/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{R}
+library("ggplot2")
+library("dplyr")
+library("tidyverse")
+library("tidyr")
+library("reshape2")
+library("dplyr")
+library("tools")
+```
+
+```{R} 
+#Using base R hist function
+pdf("Ks_all_plot.pdf")
+
+s=read.csv("Fsimplex.tsv", header = TRUE)
+s=subset(s,s$KaKs<1)
+x=hist(s$KaKs,
+       main="Histogram of Friedmanniomyces simplex",
+       xlab="Friedmanniomyces simplex",
+       ylab="Frequency",
+       las=1,
+       100)
+
+e=read.csv("Fendolithicus.tsv", header=TRUE)
+e=subset(e,e$KaKs<1)
+f=hist(e$KaKs,
+       main="Histogram of Friedmanniomyces endolithicus",
+       xlab="Friedmanniomyces endolithicus",
+       ylab="Frequency",
+       las=1,
+       100)
+
+w=read.csv("Hwer.tsv", header=TRUE)
+w=subset(w,w$KaKs<1)
+h=hist(w$KaKs,
+       main="Histogram of Hortaea werneckii",
+       xlab="Hortaea werneckii",
+       ylab="Frequency",
+       las=1,
+       100)
+
+dev.off()
+```
+#data=data[!apply(data == "", 1, all),] = if I wanted to remove empty rows.
+
+```{R}
+#I wanted to work with ggplot here to get nicer figures.
+pdf("Ks_ggplot.all_plot.pdf")
+
+s=read.csv("Fsimplex.tsv", header = TRUE)
+s=subset(s,KaKs<1.0)
+ggplot(data=s,aes(KaKs)) + geom_histogram(binwidth=0.01,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Friedmanniomyces simplex", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
+#qplot(s$KaKs, geom="histogram")
+
+e=read.csv("Fendolithicus.tsv", header=TRUE)
+e=subset(e,KaKs<1.0)
+Fendo=ggplot(data=e,aes(KaKs)) + geom_histogram(binwidth=0.02,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Friedmanniomyces endolithicus", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
+
+w=read.csv("Hwer.tsv", header=TRUE)
+w=subset(w,KaKs<1.0)
+Hwer=ggplot(data=w,aes(KaKs)) + geom_histogram(binwidth=0.02,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Hortaea werneckii", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
+
+dev.off()
+```
+
+
+```{R}
+pdf("Ks_Facet_ggplot.all_plot.pdf")
+
+#Take combined dataset and create visuals.
+all=read.csv("all.tsv", sep="\t", header = TRUE, dec = ".", na.strings = c("-nan"), stringsAsFactors=FALSE) #added stringsAsFactors because of factors error.
+gg <- melt(all) #molten data
+gg=subset(all,F.endolithicus<1.0 & F.simplex<1.0 & H.werneckii<1.0) #get the smaller values
+gg_long <- gg %>% gather(strains, frequency, F.endolithicus:H.werneckii) #gotta make this data long to have only TWO variables. https://stackoverflow.com/questions/61068031/error-stat-count-can-only-have-an-x-or-y-aesthetic 
+
+gg_long$strains <-as.factor(as.character(gg_long$strains))
+gg_long$frequency <-as.numeric(as.character(gg_long$frequency)) #making sure data is numbers
+gg_long <- subset(gg_long, !is.na(frequency)) #lots of empty cells, remove with this.
+
+#this one gets them facing the right way
+plot = ggplot(data=gg_long, aes(strains, frequency), fill=count) + geom_bar(width=0.5, alpha = .8, stat = 'identity')
+
+#this one is horizontal
+plot = ggplot(data=gg_long, aes(frequency, strains), fill=count) + geom_bar(width=0.5, alpha = .8, stat = 'identity') 
+
+plot(plot)
+#after_stat
+
+#KaKs_grid=plot + facet_grid(vars(strains), scales = "free")
+KaKs_grid=plot + facet_grid((strains ~ .), scales = "free")
+plot(KaKs_grid)
+dev.off()
+```
