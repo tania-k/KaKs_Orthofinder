@@ -12,7 +12,7 @@ library("tools")
 #Using base R hist function
 pdf("Ks_all_plot.pdf")
 
-FsAll <- read_tsv("Fsimplex.tsv")
+FsAll <- read_tsv("data/Fsimplex.tsv")
 Fs <- FsAll %>% filter(Ks <= 1)
 x=hist(Fs$Ks,
        main="Histogram of Friedmanniomyces simplex Ks",
@@ -21,7 +21,7 @@ x=hist(Fs$Ks,
        las=1,
        100)
 
-FeAll = read_tsv("Fendolithicus.tsv")
+FeAll = read_tsv("data/Fendolithicus.tsv")
 Fe= FeAll %>% filter(Ks <= 1)
 
 f=hist(Fe$Ks,
@@ -31,7 +31,7 @@ f=hist(Fe$Ks,
        las=1,
        100)
 
-HwAll=read_tsv("Hwer.tsv")
+HwAll=read_tsv("data/Hwer.tsv")
 Hw=HwAll %>% filter(Ks <=1)
 h=hist(Hw$Ks,
        main="Histogram of Hortaea werneckii Ks",
