@@ -8,32 +8,33 @@ library("tidyr")
 library("reshape2")
 library("dplyr")
 library("tools")
-
+library(RColorBrewer)
+library("cowplot")
 #Using base R hist function
-pdf("Ks_all_plot.pdf")
+pdf("plots/Ks_histogram1.pdf")
 
-FsAll <- read_tsv("data/Fsimplex.tsv")
-Fs <- FsAll %>% filter(Ks <= 1)
-x=hist(Fs$Ks,
+FsAll <- read_tsv("data/Friedmanniomyces_simplex_CCFEE_5184.KaKs.tsv")
+Fs <- FsAll %>% filter(dS <= 1)
+hist(Fs$dS,
        main="Histogram of Friedmanniomyces simplex Ks",
        xlab="Ks",
        ylab="Frequency",
        las=1,
        100)
 
-FeAll = read_tsv("data/Fendolithicus.tsv")
-Fe= FeAll %>% filter(Ks <= 1)
+FeAll = read_tsv("data/Friedmanniomyces_endolithicus_CCFEE_5311.KaKs.tsv")
+Fe= FeAll %>% filter(dS <= 1)
 
-f=hist(Fe$Ks,
+hist(Fe$dS,
        main="Histogram of Friedmanniomyces endolithicus Ks",
        xlab="Ks",
        ylab="Frequency",
        las=1,
        100)
 
-HwAll=read_tsv("data/Hwer.tsv")
-Hw=HwAll %>% filter(Ks <=1)
-h=hist(Hw$Ks,
+HwAll=read_tsv("data/Hortaea_werneckii_EXF-2000-UCR.KaKs.tsv")
+Hw=HwAll %>% filter(dS <=1)
+hist(Hw$dS,
        main="Histogram of Hortaea werneckii Ks",
        xlab="Ks",
        ylab="Frequency",
@@ -43,48 +44,28 @@ h=hist(Hw$Ks,
 dev.off()
 
 #I wanted to work with ggplot here to get nicer figures.
-KsPlotFile = "Ks_ggplot.all_plot.pdf"
+KsPlotFile = "plots/Ks_histogram2.pdf"
 
-KsData = tibble( ~Fsimplex      = Fs,
-                 ~Fendolithicus = Fe,
-                 ~Hwerneckii    = Hw)
-
-ggplot(data=s,aes(KaKs)) + geom_histogram(binwidth=0.01,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Friedmanniomyces simplex", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
-#qplot(s$KaKs, geom="histogram")
-
-e=read.csv("Fendolithicus.tsv", header=TRUE)
-e=subset(e,KaKs<1.0)
-Fendo=ggplot(data=e,aes(KaKs)) + geom_histogram(binwidth=0.02,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Friedmanniomyces endolithicus", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
-
-w=read.csv("Hwer.tsv", header=TRUE)
-w=subset(w,KaKs<1.0)
-Hwer=ggplot(data=w,aes(KaKs)) + geom_histogram(binwidth=0.02,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency of Ancestral Duplicated Genes for Hortaea werneckii", x="Frequencies", y="Count of Frequencies") + scale_fill_gradient("Count", low="green", high="red") + theme_classic()
-
-dev.off()
+p1 <- ggplot(Fs,aes(x=dS)) + geom_histogram(binwidth=0.01,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency Friedmanniomyces simplex", x="Ks", y="Frequency") +
+        scale_fill_gradient("Count", low="green", high="red") + theme_classic()
 
 
-pdf("Ks_Facet_ggplot.all_plot.pdf")
+p2 <- ggplot(Fe,aes(x=dS)) + geom_histogram(binwidth=0.01,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency Friedmanniomyces endolithicus", x="Ks", y="Frequency") +
+        scale_fill_gradient("Count", low="green", high="red") + theme_classic()
 
-#Take combined dataset and create visuals.
-all=read.csv("all.tsv", sep="\t", header = TRUE, dec = ".", na.strings = c("-nan"), stringsAsFactors=FALSE) #added stringsAsFactors because of factors error.
-gg <- melt(all) #molten data
-gg=subset(all,F.endolithicus<1.0 & F.simplex<1.0 & H.werneckii<1.0) #get the smaller values
-gg_long <- gg %>% gather(strains, frequency, F.endolithicus:H.werneckii) #gotta make this data long to have only TWO variables. https://stackoverflow.com/questions/61068031/error-stat-count-can-only-have-an-x-or-y-aesthetic 
+p3 <- ggplot(Hw,aes(x=dS)) + geom_histogram(binwidth=0.01,aes(fill=..count..), alpha = .8) + labs(title="Ks Frequency Hortaea werneckii ", x="Ks", y="Frequency") +
+        scale_fill_gradient("Count", low="green", high="red") + theme_classic()
 
-gg_long$strains <-as.factor(as.character(gg_long$strains))
-gg_long$frequency <-as.numeric(as.character(gg_long$frequency)) #making sure data is numbers
-gg_long <- subset(gg_long, !is.na(frequency)) #lots of empty cells, remove with this.
+gridplot = plot_grid(p1, p2, p3, labels = c('A', 'B', 'C'), label_size = 12)
+ggsave(KsPlotFile,gridplot,width=10)
 
-#this one gets them facing the right way
-plot = ggplot(data=gg_long, aes(strains, frequency), fill=count) + geom_bar(width=0.5, alpha = .8, stat = 'identity')
+comboData <- bind_rows(
+        select(Fs, dS) %>% rename(Fsimplex = dS) %>% gather("species","dS"),
+        select(Fe, dS) %>% rename(Fendolithicus = dS) %>% gather("species","dS"),
+        select(Hw,dS) %>% rename(Hwerneckii = dS) %>% gather("species","dS")
+)
 
-#this one is horizontal
-plot = ggplot(data=gg_long, aes(frequency, strains), fill=count) + geom_bar(width=0.5, alpha = .8, stat = 'identity') 
-
-plot(plot)
-#after_stat
-
-#KaKs_grid=plot + facet_grid(vars(strains), scales = "free")
-KaKs_grid=plot + facet_grid((strains ~ .), scales = "free")
-plot(KaKs_grid)
-dev.off()
+KsPlotBarplot =  "plots/Ks_boxplot.pdf"
+p<- ggplot(comboData,aes(x=species,y=dS,color=species)) + geom_boxplot(outlier.shape = NA) + geom_jitter(size = 0.6,width=0.2,alpha=0.7,shape=16) + 
+        labs(title="Boxplot of Ks values in duplicated gene pairs", x="Species", y="Ks") + scale_color_brewer(palette='Set1')
+ggsave(KsPlotBarplot,p,width=12) 
