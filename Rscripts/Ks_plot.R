@@ -56,12 +56,26 @@ gridplot = plot_grid(p1, p2, p3, labels = c('A', 'B', 'C'), label_size = 12)
 ggsave(KsPlotFile,gridplot,width=10)
 
 comboData <- bind_rows(
-        select(Fs, dS) %>% rename(Fsimplex = dS) %>% gather("species","dS"),
-        select(Fe, dS) %>% rename(Fendolithicus = dS) %>% gather("species","dS"),
-        select(Hw,dS) %>% rename(Hwerneckii = dS) %>% gather("species","dS")
+        Fs %>% select(dS) %>% rename(Fsimplex = dS) %>% gather("species","dS"),
+        Fe %>% select(dS) %>% rename(Fendolithicus = dS) %>% gather("species","dS"),
+        Hw %>% select(dS) %>% rename(Hwerneckii = dS) %>% gather("species","dS")
 )
 
 KsPlotBarplot =  "plots/Ks_boxplot.pdf"
 p<- ggplot(comboData,aes(x=species,y=dS,color=species)) + geom_boxplot(outlier.shape = NA) + geom_jitter(size = 0.6,width=0.2,alpha=0.7,shape=16) + 
         labs(title="Boxplot of Ks values in duplicated gene pairs", x="Species", y="Ks") + scale_color_brewer(palette='Set1')
 ggsave(KsPlotBarplot,p,width=12) 
+
+KsPlotBarplot =  "plots/Ks_boxplot_shortaln.pdf"
+MAXLEN = 100
+comboData <- bind_rows(
+        Fs %>% filter(LENGTH <= MAXLEN) %>% select(dS) %>% rename(Fsimplex = dS) %>% gather("species","dS"),
+        Fe %>% filter(LENGTH <= MAXLEN) %>% select(dS) %>% rename(Fendolithicus = dS) %>% gather("species","dS"),
+        Hw %>% filter(LENGTH <= MAXLEN) %>% select(dS) %>% rename(Hwerneckii = dS) %>% gather("species","dS"),
+)
+
+p<- ggplot(comboData,aes(x=species,y=dS,color=species)) + geom_boxplot(outlier.shape = NA) + geom_jitter(size = 0.6,width=0.2,alpha=0.7,shape=16) + 
+        labs(title=sprintf("Boxplot of Ks values in duplicated gene pairs with Alignment < %d",MAXLEN), x="Species", y="Ks") + scale_color_brewer(palette='Set1')
+ggsave(KsPlotBarplot,p,width=12) 
+
+
