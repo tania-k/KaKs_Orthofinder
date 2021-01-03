@@ -1,15 +1,11 @@
 # based on Tania-K but simplified
 
-library("ggplot2")
-library("dplyr")
-library("readr")
-library("tidyverse")
-library("tidyr")
-library("reshape2")
-library("dplyr")
-library("tools")
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(tidyverse)
 library(RColorBrewer)
-library("cowplot")
+library(cowplot)
 #Using base R hist function
 pdf("plots/Ks_histogram1.pdf")
 
