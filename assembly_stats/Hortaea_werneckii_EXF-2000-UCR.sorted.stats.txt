@@ -1,0 +1,13 @@
+[92m[Aug 07 06:39 PM][00m Running AAFTF v0.2.3
+Assembly statistics for: Hortaea_werneckii_EXF-2000.sorted.fasta
+   CONTIG COUNT  =  629
+   TOTAL LENGTH  =  49777326
+            MIN  =  561
+            MAX  =  787827
+         MEDIAN  =  44319
+           MEAN  =  79137.24
+            L50  =  100
+            N50  =  153735
+            L90  =  333
+            N90  =  40700
+

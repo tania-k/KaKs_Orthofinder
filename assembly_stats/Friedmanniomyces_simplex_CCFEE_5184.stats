@@ -1,0 +1,13 @@
+[92m[Jan 06 12:45 AM][00m Running AAFTF v0.2.4
+Assembly statistics for: Friedmanniomyces_simplex_CCFEE_5184.sorted.fasta
+   CONTIG COUNT  =  53633
+   TOTAL LENGTH  =  60580441
+            MIN  =  200
+            MAX  =  124839
+         MEDIAN  =  288
+           MEAN  =  1129.54
+            L50  =  2405
+            N50  =  4715
+            L90  =  29627
+            N90  =  256
+

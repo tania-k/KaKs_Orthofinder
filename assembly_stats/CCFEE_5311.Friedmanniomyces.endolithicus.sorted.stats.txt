@@ -1,0 +1,13 @@
+[92m[Jan 06 12:48 AM][00m Running AAFTF v0.2.4
+Assembly statistics for: CCFEE_5311.Friedmanniomyces.endolithicus.masked.fasta
+   CONTIG COUNT  =  3285
+   TOTAL LENGTH  =  47025342
+            MIN  =  200
+            MAX  =  823998
+         MEDIAN  =  431
+           MEAN  =  14315.17
+            L50  =  124
+            N50  =  122020
+            L90  =  442
+            N90  =  24895
+
